@@ -7,7 +7,7 @@ echo '*** O endereço remoto é simulado ***' . PHP_EOL;
 echo '*** Quando bloqueado, será gerado HTTP 403 caso não seja passado Ipcontrol::proteger(false)***' . PHP_EOL;
 echo PHP_EOL;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../src/Ipcontrol.php';
 use Uspdev\Ipcontrol\Ipcontrol;
 
 $msg = 'Sem definir USPDEV_IP_CONTROL: ';
