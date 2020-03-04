@@ -22,7 +22,7 @@ Esta biblioteca foi testada somente em Linux e em PHP 7.2 e 7.3 usando apache.
 Para instalar use o composer
 
 ```bash
-composer require upsdev/ip-control
+composer require uspdev/ip-control
 ```
 
 A biblioteca usa as seguintes configurações
