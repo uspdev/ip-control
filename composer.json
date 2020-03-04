@@ -2,7 +2,7 @@
     "name": "uspdev/ip-control",
     "description": "Blibliteca de controle de acesso por IP",
     "type": "library",
-    "license": "GPL-v3",
+    "license": "GPL-3.0-or-later",
     "authors": [
         {
             "name": "Masaki Kawabata Neto",
