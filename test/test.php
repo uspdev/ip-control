@@ -18,6 +18,8 @@ if (Ipcontrol::proteger()) {
 }
 echo $msg, PHP_EOL;
 
+echo '  status: ', json_encode(ipcontrol::status()), PHP_EOL;
+
 $msg = 'Definindo USPDEV_IP_CONTROL=localhost: ';
 $msg .= localhost('127.0.0.1');
 echo $msg . PHP_EOL;
@@ -25,6 +27,8 @@ echo $msg . PHP_EOL;
 $msg = 'Definindo USPDEV_IP_CONTROL=localhost: ';
 $msg .= localhost('127.0.0.2');
 echo $msg . PHP_EOL;
+
+echo '  status: ', json_encode(ipcontrol::status()), PHP_EOL;
 
 $msg = 'Definindo USPDEV_IP_CONTROL=whitelist: ';
 $msg .= whitelist('127.0.0.1');
@@ -37,6 +41,9 @@ echo $msg . PHP_EOL;
 $msg = 'Definindo USPDEV_IP_CONTROL=whitelist: ';
 $msg .= whitelist('143.107.225.6');
 echo $msg . PHP_EOL;
+
+echo '  status: ', json_encode(ipcontrol::status(),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE), PHP_EOL;
+
 
 // -----------------------------------------------
 function localhost($addr)
