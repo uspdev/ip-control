@@ -10,7 +10,7 @@ class Ipcontrol
         $ret = false;
         switch ($ipControl) {
             case false:
-                // variavel nao foi definida
+                // variavel nao foi definida, vamos liberar
                 $ret = true;
                 break;
 
@@ -38,6 +38,29 @@ class Ipcontrol
             }
         }
         return $ret;
+    }
+
+    public static function status()
+    {
+        $ret['USPDEV_IP_CONTROL'] = getenv('USPDEV_IP_CONTROL');// ? 'não definido' : getenv('USPDEV_IP_CONTROL');
+        if ($ret['USPDEV_IP_CONTROL'] == 'whitelist') {
+            //$ret['USPDEV_IP_CONTROL_FILE'] = getenv('USPDEV_IP_CONTROL_FILE');
+            $ret['ip_list'] = SELF::getIpList(getenv('USPDEV_IP_CONTROL_FILE'));
+        }
+        
+        return $ret;
+    }
+
+    public static function getIpList($ipfile)
+    {
+        // vamos ler o arquivo de endereços autorizados
+        if (($handle = fopen($ipfile, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                $iplist[] = $row;
+            }
+            fclose($handle);
+            return $iplist;
+        }
     }
 
     protected static function halt($msg = '')
@@ -80,18 +103,6 @@ class Ipcontrol
             return true;
         } else {
             return false;
-        }
-    }
-
-    public static function getIpList($ipfile)
-    {
-        // vamos ler o arquivo de endereços autorizados
-        if (($handle = fopen($ipfile, 'r')) !== false) {
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                $iplist[] = $row;
-            }
-            fclose($handle);
-            return $iplist;
         }
     }
 }
