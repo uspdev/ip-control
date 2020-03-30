@@ -1,0 +1,2 @@
+192.168.0.0, 24, rede privativa
+10.233.0.1, 16, rede classe 10

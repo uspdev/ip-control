@@ -2,6 +2,9 @@
 
 class Ipcontrol
 {
+    // o nome do arquivo é predefinido
+    const ip_white_file = 'uspdev_ip_control_whitelist.txt';
+
     public static function proteger($die = true)
     {
 
@@ -10,6 +13,7 @@ class Ipcontrol
         $ret = false;
         switch ($ipControl) {
             case false:
+            case '0':
                 // variavel nao foi definida, vamos liberar
                 $ret = true;
                 break;
@@ -22,77 +26,70 @@ class Ipcontrol
                 if (SELF::localhost()) {
                     $ret = true;
                 } else {
-                    $ipfile = getenv('USPDEV_IP_CONTROL_FILE');
-                    if (empty($ipfile)) {
-                        die('USPDEV_IP_CONTROL_FILE não definido!');
+                    if ($local = getenv('USPDEV_IP_CONTROL_LOCAL')) {
+                        $whitefile = $local . '/' . SELF::ip_white_file;
+                    } else {
+                        die('USPDEV_IP_CONTROL_LOCAL não definido!');
                     }
-                    $ret = SELF::whitelist($ipfile);
+                    $whitelist = SELF::leArquivo($whitefile);
+                    $ret = SELF::whiteList($whitelist);
                 }
                 break;
         }
 
         // se for negar acesso vamos verificar se vai ser 403 ou false
-        if ($ret == false) {
-            if ($die == true) {
-                SELF::halt();
-            }
+        if ($ret == false && $die == true) {
+            header('HTTP/1.0 403 Forbidden');
+            die($msg);
         }
         return $ret;
     }
 
     public static function status()
     {
-        $ret['USPDEV_IP_CONTROL'] = getenv('USPDEV_IP_CONTROL');// ? 'não definido' : getenv('USPDEV_IP_CONTROL');
-        if ($ret['USPDEV_IP_CONTROL'] == 'whitelist') {
-            //$ret['USPDEV_IP_CONTROL_FILE'] = getenv('USPDEV_IP_CONTROL_FILE');
-            $ret['ip_list'] = SELF::getIpList(getenv('USPDEV_IP_CONTROL_FILE'));
+        $ip_control = getenv('USPDEV_IP_CONTROL'); // ? 'não definido' : getenv('USPDEV_IP_CONTROL');
+
+        $ret['enable'] = $ip_control ? 'sim' : 'não'; // getenv('USPDEV_IP_CONTROL'); // ? 'não definido' : getenv('USPDEV_IP_CONTROL');
+        if ($ip_control == 'whitelist') {
+            $ret['ip_control'] = $ip_control;
+            $ret['local'] = getenv('USPDEV_IP_CONTROL_LOCAL');
+            $ret['ip_whitelist'] = SELF::leArquivo(getenv('USPDEV_IP_CONTROL_LOCAL') . '/' . SELF::ip_white_file);
         }
-        
+
         return $ret;
     }
 
-    public static function getIpList($ipfile)
+    public static function leArquivo($csv_file)
     {
         // vamos ler o arquivo de endereços autorizados
-        if (($handle = fopen($ipfile, 'r')) !== false) {
+        if (($handle = @fopen($csv_file, 'r')) !== false) {
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                 $iplist[] = $row;
             }
             fclose($handle);
             return $iplist;
-        }
-    }
-
-    protected static function halt($msg = '')
-    {
-        header('HTTP/1.0 403 Forbidden');
-        die($msg);
-    }
-
-    protected static function whiteList($ipfile)
-    {
-        // vamos ler o arquivo de endereços autorizados
-        if (($handle = fopen($ipfile, 'r')) !== false) {
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-
-                // e ver se o ip está na lista
-                // https://stackoverflow.com/questions/2869893/block-specific-ip-block-from-my-website-in-php
-                $network = ip2long($row[0]);
-                $prefix = (int) $row[1];
-                $ip = ip2long($_SERVER['REMOTE_ADDR']);
-
-                if ($network >> (32 - $prefix) == $ip >> (32 - $prefix)) {
-                    // Se sim, vamos liberar o acesso
-                    fclose($handle);
-                    return true;
-                }
-            }
-            fclose($handle);
-            // aqui vamos negar o acesso
-            return false;
         } else {
-            die('Erro fatal ao ler arquivo ' . $ipfile);
+            die('Erro fatal ao ler arquivo ' . $csv_file);
         }
+    }
+
+    protected static function whiteList($iplist)
+    {
+        // Vamos percorrer a lista e testar uma um
+        foreach ($iplist as $ip) {
+
+            // https://stackoverflow.com/questions/2869893/block-specific-ip-block-from-my-website-in-php
+            $network = ip2long($ip[0]);
+            $prefix = (int) $ip[1];
+            $remote_ip = ip2long($_SERVER['REMOTE_ADDR']);
+
+            if ($network >> (32 - $prefix) == $remote_ip >> (32 - $prefix)) {
+                // Se sim, vamos liberar o acesso
+                return true;
+            }
+            // se não, vamos para o próximo
+        }
+        return false;
     }
 
     protected static function localhost()
