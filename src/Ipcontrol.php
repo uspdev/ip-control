@@ -47,13 +47,15 @@ class Ipcontrol
 
     public static function status()
     {
-        $ip_control = getenv('USPDEV_IP_CONTROL'); // ? 'não definido' : getenv('USPDEV_IP_CONTROL');
+        $ip_control = getenv('USPDEV_IP_CONTROL');
 
-        $ret['enable'] = $ip_control ? 'sim' : 'não'; // getenv('USPDEV_IP_CONTROL'); // ? 'não definido' : getenv('USPDEV_IP_CONTROL');
-        if ($ip_control == 'whitelist') {
+        $ret['enable'] = $ip_control ? 'sim' : 'não';
+        if ($ip_control) {
             $ret['ip_control'] = $ip_control;
-            $ret['local'] = getenv('USPDEV_IP_CONTROL_LOCAL');
-            $ret['ip_whitelist'] = SELF::leArquivo(getenv('USPDEV_IP_CONTROL_LOCAL') . '/' . SELF::ip_white_file);
+            if ($ip_control == 'whitelist') {
+                $ret['local'] = getenv('USPDEV_IP_CONTROL_LOCAL');
+                $ret['ip_whitelist'] = SELF::leArquivo(getenv('USPDEV_IP_CONTROL_LOCAL') . '/' . SELF::ip_white_file);
+            }
         }
 
         return $ret;
