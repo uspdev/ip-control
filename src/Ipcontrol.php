@@ -61,8 +61,14 @@ class Ipcontrol
 
     public static function leArquivo($csv_file)
     {
+        if (!is_file($csv_file)) {
+            touch($csv_file);
+            die('Arquivo ' . $csv_file . ' criado. Edite para proteger sua aplicação.');
+
+        }
         // vamos ler o arquivo de endereços autorizados
         if (($handle = @fopen($csv_file, 'r')) !== false) {
+            $iplist = [];
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                 $iplist[] = $row;
             }
